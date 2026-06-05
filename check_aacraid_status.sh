@@ -62,7 +62,7 @@ for DISK_ID in 0 1 2 3; do
     [[ ! "$NAND_BLK" =~ ^[0-9]+$ ]] && NAND_BLK=0
 
     # Build Output
-    OUTPUT_SUMMARY="${OUTPUT_SUMMARY}[Disk ${DISK_ID}: ${MODEL} SN:${SERIAL} Life:${LIFETIME}% NAND:${NAND_BLK}] "
+    OUTPUT_SUMMARY="${OUTPUT_SUMMARY}[Disk ${DISK_ID}: ${MODEL} SN:${SERIAL} Life:${LIFETIME}% NAND_BLK_CNT:${NAND_BLK}] "
 
     # Evaluate Status
     if [ "$LIFETIME" -le "$CRIT_LIFETIME" ] || [ "$NAND_BLK" -le "$CRIT_NAND_BLK" ]; then
