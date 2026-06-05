@@ -25,13 +25,8 @@ for DISK_ID in 0 1 2 3; do
     # Extract and parse the line for Percent_Lifetime_Remain
     LIFETIME_LINE=$(echo "$SMART_DATA" | grep "Percent_Lifetime_Remain")
     if [ -n "$LIFETIME_LINE" ]; then
-        # If the line contains "FAILING_NOW", force lifetime to 0% to trip alerts
-        if echo "$LIFETIME_LINE" | grep -q "FAILING_NOW"; then
-            LIFETIME=0
-        else
-            # Grab the 10th column (RAW_VALUE) directly to bypass trailing text strings
-            LIFETIME=$(echo "$LIFETIME_LINE" | awk '{print $10}')
-        fi
+        # Grab Column 4 (VALUE) from your table layout
+        LIFETIME=$(echo "$LIFETIME_LINE" | awk '{print $4}')
     else
         LIFETIME=100
     fi
@@ -39,15 +34,17 @@ for DISK_ID in 0 1 2 3; do
     # Extract and parse the line for Reallocate_NAND_Blk_Cnt
     NAND_BLK_LINE=$(echo "$SMART_DATA" | grep "Reallocate_NAND_Blk_Cnt")
     if [ -n "$NAND_BLK_LINE" ]; then
-        # Grab the 10th column (RAW_VALUE) directly
-        NAND_BLK=$(echo "$NAND_BLK_LINE" | awk '{print $10}')
+        # Grab Column 9 (RAW_VALUE) for the absolute bad block count
+        NAND_BLK=$(echo "$NAND_BLK_LINE" | awk '{print $9}')
     else
         NAND_BLK=0
     fi
 
-    # Remove any potential leading zeros to prevent bash from treating it as octal
+    # Remove any potential leading zeros to prevent bash octal errors (e.g., "062" -> "62")
     LIFETIME=$(echo "$LIFETIME" | sed 's/^0*//')
     NAND_BLK=$(echo "$NAND_BLK" | sed 's/^0*//')
+    
+    # If stripping zeros emptied the string (e.g. "000"), set back to 0
     LIFETIME=${LIFETIME:-0}
     NAND_BLK=${NAND_BLK:-0}
 
@@ -76,4 +73,5 @@ esac
 # Print the Final Combined Output and Exit
 echo "${PREFIX} - ${OUTPUT_SUMMARY}| ${PERFDATA_SUMMARY}"
 exit $FINAL_STATUS
+
 
