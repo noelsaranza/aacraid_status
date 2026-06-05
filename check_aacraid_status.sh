@@ -17,7 +17,7 @@ OUTPUT_SUMMARY=""
 # Check the 4 SSDs
 for DISK_ID in 0 1 2 3; do
 
-    SMART_DATA=$(smartctl -d aacraid,0,0,$DISK_ID -a /dev/sg0 2>/dev/null)
+    SMART_DATA=$(sudo /usr/sbin/smartctl -d aacraid,0,0,$DISK_ID -a /dev/sg0 2>/dev/null)
 
     # Handle missing SMART data
     if [ -z "$SMART_DATA" ]; then
