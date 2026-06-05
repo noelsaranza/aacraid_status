@@ -34,8 +34,8 @@ for DISK_ID in 0 1 2 3; do
     # Extract and parse the line for Reallocate_NAND_Blk_Cnt
     NAND_BLK_LINE=$(echo "$SMART_DATA" | grep "Reallocate_NAND_Blk_Cnt")
     if [ -n "$NAND_BLK_LINE" ]; then
-        # Grab Column 9 (RAW_VALUE) for the absolute bad block count
-        NAND_BLK=$(echo "$NAND_BLK_LINE" | awk '{print $9}')
+        # Grab Column 4 (VALUE) to avoid hyphen column-shifting issues
+        NAND_BLK=$(echo "$NAND_BLK_LINE" | awk '{print $4}')
     else
         NAND_BLK=0
     fi
@@ -44,9 +44,9 @@ for DISK_ID in 0 1 2 3; do
     LIFETIME=$(echo "$LIFETIME" | sed 's/^0*//')
     NAND_BLK=$(echo "$NAND_BLK" | sed 's/^0*//')
     
-    # If stripping zeros emptied the string (e.g. "000"), set back to 0
-    LIFETIME=${LIFETIME:-0}
-    NAND_BLK=${NAND_BLK:-0}
+    # If stripping zeros emptied the string or hit a non-number, set back to 0
+    [[ ! "$LIFETIME" =~ ^[0-9]+$ ]] && LIFETIME=0
+    [[ ! "$NAND_BLK" =~ ^[0-9]+$ ]] && NAND_BLK=0
 
     # Append data to the human-readable summary string
     OUTPUT_SUMMARY="${OUTPUT_SUMMARY}[Disk ${DISK_ID}: Life ${LIFETIME}%, BadBlk ${NAND_BLK}] "
@@ -73,5 +73,4 @@ esac
 # Print the Final Combined Output and Exit
 echo "${PREFIX} - ${OUTPUT_SUMMARY}| ${PERFDATA_SUMMARY}"
 exit $FINAL_STATUS
-
 
